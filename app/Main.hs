@@ -70,7 +70,7 @@ main = do
         connect sock addr
         logger "Client1" "connect"
         wait 10
-        sendValue put sock $ (-1 :: Int)
+--         sendValue put sock $ (-1 :: Int)
         logger "Client1" "sent"
         logger "Client1" "close"
 
@@ -80,7 +80,7 @@ main = do
         connect sock addr
         logger "Client2" "connect"
         wait 2
-        sendValue put sock $ (-1 :: Int)
+--         sendValue put sock $ (-1 :: Int)
         logger "Client2" "sent"
         logger "Client2" "close"
 
