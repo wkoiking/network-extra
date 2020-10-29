@@ -53,7 +53,7 @@ main = do
         errorHandler err = logger "" $ show err
 
     -- Server
-    _ <- forkIO $ runTcpServer (logger "Server1") port (5 * 1000) $ procRecvVal (get :: Get MyData) $ \ a -> do
+    _ <- forkIO $ runTcpServer (logger "Server1") port (3000 * 1000) $ procRecvVal (get :: Get MyData) $ \ a -> do
         logger "Server1" $ show a
         return ()
 
@@ -71,7 +71,7 @@ main = do
         logger "Client1" "connect"
         wait 10
 --         sendValue put sock $ (-1 :: Int)
-        logger "Client1" "sent"
+--         logger "Client1" "sent"
         logger "Client1" "close"
 
     -- Client2
@@ -81,7 +81,7 @@ main = do
         logger "Client2" "connect"
         wait 2
 --         sendValue put sock $ (-1 :: Int)
-        logger "Client2" "sent"
+--         logger "Client2" "sent"
         logger "Client2" "close"
 
     wait 20

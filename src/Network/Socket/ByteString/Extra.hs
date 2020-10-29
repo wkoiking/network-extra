@@ -187,9 +187,11 @@ runTcpServer logger port timeoutMicroSec proc = bracket (openSockTCPServer port)
             Just (StringException str _) -> log' str
             Nothing                      -> log' $ unwords ["error message:", show err]
     forkIO $ handle errorHandler $ (`finally` close connsock) $ do
-        m <- timeout (fromIntegral timeoutMicroSec) $ proc connsock clientaddr
+        m <- timeout (fromIntegral timeoutMicroSec) $ do
+            proc connsock clientaddr
+            waitFin connsock
         case m of
-            Just () -> waitFin connsock
+            Just () -> return ()
             Nothing -> throwString "Process timeout"
         
 
