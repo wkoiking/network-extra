@@ -53,7 +53,7 @@ main = do
         errorHandler err = logger "" $ show err
 
     -- Server
-    _ <- forkIO $ runTcpServer (logger "Server1") port (5000 * 1000) $ procRecvVal (get :: Get MyData) $ \ a -> do
+    _ <- forkIO $ runTcpServer (logger "Server1") port (5 * 1000) $ procRecvVal (get :: Get MyData) $ \ a -> do
         logger "Server1" $ show a
         return ()
 
