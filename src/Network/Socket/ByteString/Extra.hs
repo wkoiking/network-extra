@@ -10,7 +10,7 @@ module Network.Socket.ByteString.Extra
     , openSockUDPReceiver
     , openSockTCPServer
     , openSockTCPClient
-    , waitFinAndClose
+    , waitFin
     , withSocket
     )
 where
@@ -34,6 +34,7 @@ import Control.Exception.Safe
 import Control.Monad (when, forever)
 import Control.Concurrent (forkIO)
 import Data.List (splitAt, intercalate)
+import System.Timeout (timeout)
 -- cereal
 import Data.Serialize (runGetPartial, runPutLazy, decodeLazy, encodeLazy, Get, Putter, Result(..), Serialize(..))
 -- deepseq
@@ -148,12 +149,11 @@ openSockTCPClient hostname port = do
     connect sock (addrAddress serveraddr)
     return sock
 
-waitFinAndClose :: Socket -> IO ()
-waitFinAndClose sock = do
---     { shutdown sock ShutdownSend
-    { _ <- recvAll sock 1024
-    ; return ()
-    } `finally` close sock
+waitFin :: Socket -> IO ()
+waitFin sock = do
+--     shutdown sock ShutdownSend
+    _ <- recvAll sock 1024
+    return ()
 
 withSocket
     :: HostName -- ^ IP Address of the target server to communicate
@@ -186,7 +186,12 @@ runTcpServer logger port timeoutMicroSec proc = bracket (openSockTCPServer port)
         errorHandler err = case fromException err :: Maybe StringException of
             Just (StringException str _) -> log' str
             Nothing                      -> log' $ unwords ["error message:", show err]
-    forkIO $ handle errorHandler $ (`finally` waitFinAndClose connsock) $ proc connsock clientaddr
+    forkIO $ handle errorHandler $ (`finally` close connsock) $ do
+        m <- timeout (fromIntegral timeoutMicroSec) $ proc connsock clientaddr
+        case m of
+            Just () -> waitFin connsock
+            Nothing -> throwString "Process timeout"
+        
 
 procRecvVal :: Get a -> (a -> IO ()) -> Socket -> SockAddr -> IO ()
 procRecvVal getter proc sock _  = do
