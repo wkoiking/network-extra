@@ -63,7 +63,7 @@ main = do
 --         forkIO $ handle errorHandler $ (`finally` waitFinAndClose connsock) $ do
 --             _ <- recv connsock 4096
 --             return ()
-
+    wait 2
     -- Client1
     _ <- forkIO $ handle errorHandler $ withSocket "localhost" port $ \ sock addr -> do
         setSocketOption sock KeepAlive 1
